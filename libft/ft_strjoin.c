@@ -6,13 +6,13 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:41:10 by chon              #+#    #+#             */
-/*   Updated: 2024/03/25 15:53:01 by chon             ###   ########.fr       */
+/*   Updated: 2024/06/17 14:37:05 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-char	*ft_strjoin(char *s1, const char *s2)
+char	*ft_strjoin(const char *s1, const char *s2)
 {
 	char	*str;
 	int		i;
@@ -32,6 +32,5 @@ char	*ft_strjoin(char *s1, const char *s2)
 	ft_memcpy(str + i, s2, s2_len);
 	i += s2_len;
 	str[i] = '\0';
-	free(s1);
 	return (str);
 }
