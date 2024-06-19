@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.h                                            :+:      :+:    :+:   */
+/*   pipex_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:34 by chon              #+#    #+#             */
-/*   Updated: 2024/06/19 15:35:18 by chon             ###   ########.fr       */
+/*   Updated: 2024/06/19 15:37:15 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PIPEX_H
-# define PIPEX_H
+#ifndef PIPEX_H_BONUS
+# define PIPEX_H_BONUS
 
-# include "libft/libft.h"
+# include "../libft/libft.h"
 # include <sys/wait.h>
 # include <errno.h>
 

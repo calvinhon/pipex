@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   main_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/06/19 16:13:22 by chon             ###   ########.fr       */
+/*   Updated: 2024/06/19 15:36:11 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
 void	find_paths(t_var *p, int ac)
 {
@@ -67,12 +67,12 @@ void	pipex(t_var *p)
 		ft_error(errno, "pipe", p);
 	pid1 = fork();
 	if (pid1 < 0)
-		ft_error(errno, "fork", p);
+		ft_error(errno, "pid1", p);
 	if (!pid1)
 		execute(p, 0, fd);
 	pid2 = fork();
 	if (pid2 < 0)
-		ft_error(errno, "fork", p);
+		ft_error(errno, "pid2", p);
 	if (!pid2)
 		execute(p, 1, fd);
 	close(fd[0]);
@@ -81,7 +81,7 @@ void	pipex(t_var *p)
 	waitpid(pid2, NULL, 0);
 }
 
-void	init(char **av, t_var *p, int ac, char **env)
+void	init(char **av, t_var *p, int ac)
 {
 	char	*paths;
 
@@ -110,13 +110,13 @@ void	init(char **av, t_var *p, int ac, char **env)
 	find_paths(p, ac);
 }
 
-int	main(int ac, char **av, char **env)
+int	main(int ac, char **av)
 {
 	t_var	p;
 
 	if (ac == 5)
 	{
-		init(av, &p, ac, env);
+		init(av, &p, ac);
 		pipex(&p);
 		free_char_arr(p.cmd_filepaths, p.cmd_args);
 		free_char_arr(p.execute_cmds, NULL);
