@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:34 by chon              #+#    #+#             */
-/*   Updated: 2024/06/19 15:35:18 by chon             ###   ########.fr       */
+/*   Updated: 2024/06/25 13:56:08 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ typedef struct s_var
 	char	**execute_cmds;
 	int		in_fd;
 	int		out_fd;
+	int		i;
+	int		j;
 }	t_var;
 
 void	ft_error(int error, char *str, t_var *p);

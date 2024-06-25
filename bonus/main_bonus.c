@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/06/19 15:36:11 by chon             ###   ########.fr       */
+/*   Updated: 2024/06/25 14:02:08 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,31 +14,31 @@
 
 void	find_paths(t_var *p, int ac)
 {
-	int		i;
-	int		j;
+	char	*filepath_0;
 	char	*filepath;
 
-	i = 0;
-	j = -1;
+	p->i = 0;
+	p->j = -1;
 	while (--ac - 2 > 0)
 	{
-		while (p->cmd_filepaths[++j])
+		while (p->cmd_filepaths[++p->j])
 		{
-			filepath = ft_strjoin(p->cmd_filepaths[j], p->cmd_args[i][0]);
+			filepath_0 = ft_strjoin(p->cmd_filepaths[p->j], "/");
+			filepath = ft_strjoin(filepath_0, p->cmd_args[p->i][0]);
+			free(filepath_0);
 			if (access(filepath, X_OK) > -1)
 			{
-				p->execute_cmds[i] = ft_strdup(filepath);
+				p->execute_cmds[p->i] = ft_strdup(filepath);
 				break ;
 			}
 			free(filepath);
 		}
-		if (!p->execute_cmds[i])
+		if (!p->execute_cmds[p->i++])
 			ft_error(errno, "cmd not found", p);
-		i++;
-		j = -1;
+		p->j = -1;
 		free(filepath);
 	}
-	p->execute_cmds[i] = NULL;
+	p->execute_cmds[p->i] = NULL;
 }
 
 void	execute(t_var *p, int cmd_idx, int *fd)
@@ -67,12 +67,12 @@ void	pipex(t_var *p)
 		ft_error(errno, "pipe", p);
 	pid1 = fork();
 	if (pid1 < 0)
-		ft_error(errno, "pid1", p);
+		ft_error(errno, "fork", p);
 	if (!pid1)
 		execute(p, 0, fd);
 	pid2 = fork();
 	if (pid2 < 0)
-		ft_error(errno, "pid2", p);
+		ft_error(errno, "fork", p);
 	if (!pid2)
 		execute(p, 1, fd);
 	close(fd[0]);
@@ -81,10 +81,8 @@ void	pipex(t_var *p)
 	waitpid(pid2, NULL, 0);
 }
 
-void	init(char **av, t_var *p, int ac)
+void	init(char **av, t_var *p, int ac, char *env)
 {
-	char	*paths;
-
 	p->cmd_args = NULL;
 	p->cmd_filepaths = NULL;
 	p->execute_cmds = NULL;
@@ -94,8 +92,7 @@ void	init(char **av, t_var *p, int ac)
 		ft_error(errno, av[1], p);
 	if (p->out_fd == -1)
 		ft_error(errno, av[4], p);
-	paths = "/usr/local/bin/:/usr/bin/:/bin/:/usr/sbin/:/sbin/";
-	p->cmd_filepaths = ft_split(paths, ':');
+	p->cmd_filepaths = ft_split(env, ':');
 	if (!p->cmd_filepaths)
 		ft_error(errno, "cmd_filepaths", p);
 	p->cmd_args = malloc(sizeof(char **) * 3);
@@ -110,13 +107,22 @@ void	init(char **av, t_var *p, int ac)
 	find_paths(p, ac);
 }
 
-int	main(int ac, char **av)
+int	main(int ac, char **av, char **env)
 {
 	t_var	p;
+	int		i;
+	char	*filepaths;
 
-	if (ac == 5)
+	i = 0;
+	filepaths = NULL;
+	while (!ft_strnstr(env[i], "PATH", 4))
+		i++;
+	if (env[i])
+		filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
+	if (ac == 5 && filepaths)
 	{
-		init(av, &p, ac);
+		init(av, &p, ac, filepaths);
+		free(filepaths);
 		pipex(&p);
 		free_char_arr(p.cmd_filepaths, p.cmd_args);
 		free_char_arr(p.execute_cmds, NULL);
