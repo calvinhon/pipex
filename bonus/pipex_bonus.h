@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PIPEX_H_BONUS
-# define PIPEX_H_BONUS
+#ifndef PIPEX_BONUS_H
+# define PIPEX_BONUS_H
 
 # include "../libft/libft.h"
 # include <sys/wait.h>
@@ -19,13 +19,16 @@
 
 typedef struct s_var
 {
+	char	*filepaths;
 	char	**cmd_filepaths;
 	char	***cmd_args;
 	char	**execute_cmds;
+	int		cmd_ct;
 	int		in_fd;
 	int		out_fd;
 	int		i;
 	int		j;
+	int		k;
 }	t_var;
 
 void	ft_error(int error, char *str, t_var *p);

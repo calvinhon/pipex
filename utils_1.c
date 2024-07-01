@@ -36,6 +36,7 @@ void	free_char_arr(char **twoD_arr, char ***threeD_arr)
 void	ft_error(int error, char *str, t_var *p)
 {
 	ft_printf("%s: %s\n", strerror(error), str);
+	free(p->filepaths);
 	free_char_arr(p->cmd_filepaths, p->cmd_args);
 	free_char_arr(p->execute_cmds, NULL);
 	exit(EXIT_FAILURE);

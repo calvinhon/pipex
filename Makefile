@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 NAME = pipex
-CFLAGS = -Wall -Werror -Wextra -g3
+CFLAGS = -Wall -Werror -Wextra -fsanitize=address -g3
 LIBFT_DIR = ./libft
 LIBFT = ./libft/libft.a
 OBJS = $(SRCS:.c=.o)

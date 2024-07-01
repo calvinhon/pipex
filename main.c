@@ -111,18 +111,18 @@ int	main(int ac, char **av, char **env)
 {
 	t_var	p;
 	int		i;
-	char	*filepaths;
 
 	i = 0;
-	filepaths = NULL;
+	p.filepaths = NULL;
 	while (!ft_strnstr(env[i], "PATH", 4))
 		i++;
 	if (env[i])
-		filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
-	if (ac == 5 && filepaths)
+		p.filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
+	if (ac == 5 && p.filepaths)
 	{
-		init(av, &p, ac, filepaths);
+		init(av, &p, ac, p.filepaths);
 		pipex(&p);
+		free(p.filepaths);
 		free_char_arr(p.cmd_filepaths, p.cmd_args);
 		free_char_arr(p.execute_cmds, NULL);
 	}

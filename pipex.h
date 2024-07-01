@@ -19,6 +19,7 @@
 
 typedef struct s_var
 {
+	char	*filepaths;
 	char	**cmd_filepaths;
 	char	***cmd_args;
 	char	**execute_cmds;

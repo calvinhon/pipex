@@ -41,44 +41,63 @@ void	find_paths(t_var *p, int ac)
 	p->execute_cmds[p->i] = NULL;
 }
 
-void	execute(t_var *p, int cmd_idx, int *fd)
+void	execute(t_var *p, int **fd, int fd_in, int fd_out)
 {
-	if (!cmd_idx)
-	{
-		if (dup2(p->in_fd, STDIN_FILENO) < 0 || dup2(fd[1], STDOUT_FILENO) < 0)
-			ft_error(errno, "dup", p);
-	}
-	else
-		if (dup2(fd[0], STDIN_FILENO) < 0 || dup2(p->out_fd, STDOUT_FILENO) < 0)
-			ft_error(errno, "dup", p);
-	close(fd[0]);
-	close(fd[1]);
-	if (execve(p->execute_cmds[cmd_idx], p->cmd_args[cmd_idx], NULL) < 0)
+	p->j = -1;
+	p->k = -1;
+
+	(void)fd;
+	// printf("in:%d out:%d\n", fd_in, fd_out);
+	if (dup2(fd_in, STDIN_FILENO) < 0 || dup2(fd_out, STDOUT_FILENO) < 0)
+		ft_error(errno, "dup", p);
+	// close(fd[0][0]);
+	// while (++p->j < p->cmd_ct - 1)
+	// {
+	// 	while (++p->k < 2)
+	// 		close(fd[p->j][p->k]);
+	// 	p->k = -1;
+	// }
+	if (execve(p->execute_cmds[p->i], p->cmd_args[p->i], NULL) < 0)
 		ft_error(errno, "execve", p);
 }
 
 void	pipex(t_var *p)
 {
-	int	fd[2];
-	int	pid1;
-	int	pid2;
+	int	fd[p->cmd_ct - 1][2];
+	int	pid[p->cmd_ct];
 
-	if (pipe(fd) < 0)
-		ft_error(errno, "pipe", p);
-	pid1 = fork();
-	if (pid1 < 0)
-		ft_error(errno, "fork", p);
-	if (!pid1)
-		execute(p, 0, fd);
-	pid2 = fork();
-	if (pid2 < 0)
-		ft_error(errno, "fork", p);
-	if (!pid2)
-		execute(p, 1, fd);
-	close(fd[0]);
-	close(fd[1]);
-	waitpid(pid1, NULL, 0);
-	waitpid(pid2, NULL, 0);
+	p->i = -1;
+	while (++p->i < p->cmd_ct - 1)
+		if (pipe(fd[p->i]) < 0)
+			ft_error(errno, "pipe", p);
+	p->i = -1;
+	while (++p->i < p->cmd_ct)
+	{
+		pid[p->i] = fork();
+		if (pid[p->i] < 0)
+			ft_error(errno, "fork", p);
+		if (!pid[p->i])
+		{
+			if (!p->i)
+				execute(p, (int **)fd, p->in_fd, fd[p->i][1]);
+			else if (p->i < p->cmd_ct - 1)
+				execute(p, (int **)fd, fd[p->i - 1][0], fd[p->i][1]);
+			else
+				execute(p, (int **)fd, fd[p->i - 1][0], p->out_fd);
+		}
+	}
+	p->j = -1;
+	p->k = -1;
+	while (++p->j < p->cmd_ct - 1)
+	{
+		while (++p->k < 2)
+			// if ((p->j == p->i && !p->k) || (p->j == p->i + 1 && p->k))
+			close(fd[p->j][p->k]);
+		p->k = -1;
+	}
+	// p->i = -1;
+	// while (++p->i < p->cmd_ct)
+	// 	waitpid(pid[p->i], NULL, 0);
 }
 
 void	init(char **av, t_var *p, int ac, char *env)
@@ -87,20 +106,21 @@ void	init(char **av, t_var *p, int ac, char *env)
 	p->cmd_filepaths = NULL;
 	p->execute_cmds = NULL;
 	p->in_fd = open(av[1], O_RDONLY);
-	p->out_fd = open(av[4], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	p->out_fd = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (p->in_fd == -1)
 		ft_error(errno, av[1], p);
 	if (p->out_fd == -1)
-		ft_error(errno, av[4], p);
+		ft_error(errno, av[ac - 1], p);
 	p->cmd_filepaths = ft_split(env, ':');
 	if (!p->cmd_filepaths)
 		ft_error(errno, "cmd_filepaths", p);
-	p->cmd_args = malloc(sizeof(char **) * 3);
+	p->cmd_args = malloc(sizeof(char **) * (ac - 2));
 	if (!p->cmd_args)
 		ft_error(errno, "malloc cmd_args", p);
-	p->cmd_args[0] = ft_split(av[2], ' ');
-	p->cmd_args[1] = ft_split(av[3], ' ');
-	p->cmd_args[2] = NULL;
+	p->i = -1;
+	while (++p->i + 2 < ac - 1)
+		p->cmd_args[p->i] = ft_split(av[p->i + 2], ' ');
+	p->cmd_args[p->i] = NULL;
 	p->execute_cmds = calloc((ac - 2), sizeof(char *));
 	if (!p->cmd_args)
 		ft_error(errno, "malloc cmd_args", p);
@@ -111,19 +131,20 @@ int	main(int ac, char **av, char **env)
 {
 	t_var	p;
 	int		i;
-	char	*filepaths;
 
 	i = 0;
-	filepaths = NULL;
+	p.filepaths = NULL;
 	while (!ft_strnstr(env[i], "PATH", 4))
 		i++;
 	if (env[i])
-		filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
-	if (ac == 5 && filepaths)
+		p.filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
+	if (ac > 4 && p.filepaths)
 	{
-		init(av, &p, ac, filepaths);
-		free(filepaths);
+		p.cmd_ct = ac - 3;
+		init(av, &p, ac, p.filepaths);
+		printf("%s\n", p.cmd_filepaths[1][0]);
 		pipex(&p);
+		free(p.filepaths);
 		free_char_arr(p.cmd_filepaths, p.cmd_args);
 		free_char_arr(p.execute_cmds, NULL);
 	}
