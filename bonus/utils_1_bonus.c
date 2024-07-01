@@ -6,38 +6,46 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/06/19 15:36:15 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/01 14:19:31 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
 
-void	free_char_arr(char **twoD_arr, char ***threeD_arr)
+void	setup(t_var *p)
 {
 	int	i;
-	int	j;
 
 	i = -1;
-	j = -1;
-	if (twoD_arr)
+	p->fd = ft_calloc(p->cmd_ct - 1, sizeof(int *));
+	if (!p->fd)
+		ft_error(errno, "fd calloc", p);
+	while (++i < p->cmd_ct - 1)
 	{
-		while (twoD_arr[++i])
-			free(twoD_arr[i]);
-		free(twoD_arr);
+		p->fd[i] = calloc(2, sizeof(int));
+		if (!p->fd)
+			ft_error(errno, "fd calloc", p);
 	}
-	if (threeD_arr)
+	p->pid = ft_calloc(p->cmd_ct, sizeof(int));
+	if (!p->pid)
+		ft_error(errno, "pid calloc", p);
+}
+
+void	close_pipes(t_var *p)
+{
+	p->j = -1;
+	p->k = -1;
+	while (++p->j < p->cmd_ct - 1)
 	{
-		while (threeD_arr[++j])
-			free_char_arr(threeD_arr[j], NULL);
-		free(threeD_arr);
+		while (++p->k < 2)
+			close(p->fd[p->j][p->k]);
+		p->k = -1;
 	}
 }
 
 void	ft_error(int error, char *str, t_var *p)
 {
 	ft_printf("%s: %s\n", strerror(error), str);
-	free(p->filepaths);
-	free_char_arr(p->cmd_filepaths, p->cmd_args);
-	free_char_arr(p->execute_cmds, NULL);
+	free_all(p);
 	exit(EXIT_FAILURE);
 }

@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/06/25 13:57:21 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/01 11:08:41 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,10 @@ int	main(int ac, char **av, char **env)
 		free_char_arr(p.execute_cmds, NULL);
 	}
 	else
+	{
+		if (p.filepaths)
+			free(p.filepaths);
 		ft_printf("Input an infile, two cmd args, and an outfile\n");
+	}
 	return (0);
 }
