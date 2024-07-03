@@ -6,7 +6,7 @@
 #    By: chon <chon@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/10 11:20:21 by chon              #+#    #+#              #
-#    Updated: 2024/07/01 14:18:24 by chon             ###   ########.fr        #
+#    Updated: 2024/07/03 18:15:12 by chon             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ CFLAGS = -Wall -Werror -Wextra -g3
 LIBFT_DIR = ./libft
 LIBFT = ./libft/libft.a
 OBJS = $(SRCS:.c=.o)
-SRCS = main.c utils_1.c
+SRCS = main.c utils_1.c free.c
 OBJS_B = $(SRCS_B:.c=.o)
 SRCS_B = ./bonus/main_bonus.c ./bonus/utils_1_bonus.c ./bonus/free_bonus.c
 

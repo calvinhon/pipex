@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/02 16:57:33 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/03 18:11:50 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,25 @@
 
 void	check_filepath(t_var *p, char **av)
 {
-	int	exit_switch;
+	int		exit_switch;
+	char	*err_msg;
 
 	exit_switch = 0;
-	if (p->i++ == p->cmd_ct - 1)
+	if (++p->i == p->cmd_ct)
 		exit_switch = 1;
-	if (ft_strlen(av[p->i]) != 0)
+	if (p->i > 1 && (!ft_strlen(p->cmd_args[p->i - 1][0])
+		|| !ft_strncmp("invalid", p->exec_cmd_path[p->i - 1], 7)))
 	{
-		if (!p->exec_cmd_path[p->i - 1]
-			|| ft_strlen(p->cmd_args[p->i - 1][0]) == 0)
+		free(p->exec_cmd_path[p->i - 1]);
+		p->exec_cmd_path[p->i - 1] = ft_strdup("invalid");
+		if (ft_strlen(av[p->i + 1]))
 		{
-			free(p->exec_cmd_path[p->i - 1]);
-			p->exec_cmd_path[p->i - 1] = ft_strdup("invalid");
-			ft_error(errno, ft_strjoin("command not found: ", p->cmd_args[p->i - 1][0]), p, exit_switch);
+			err_msg = ft_strjoin("command not found: ",
+					p->cmd_args[p->i - 1][0]);
+			ft_error(errno, err_msg, p, exit_switch);
 		}
+		else
+			ft_error(errno, ft_strdup("permission denied:"), p, exit_switch);
 	}
 }
 
@@ -38,16 +43,16 @@ void	setup(t_var *p)
 	i = -1;
 	p->fd = ft_calloc(p->cmd_ct - 1, sizeof(int *));
 	if (!p->fd)
-		ft_error(errno, "fd calloc", p, 1);
+		ft_error(errno, ft_strdup("fd calloc"), p, 1);
 	while (++i < p->cmd_ct - 1)
 	{
 		p->fd[i] = ft_calloc(2, sizeof(int));
 		if (!p->fd)
-			ft_error(errno, "fd calloc", p, 1);
+			ft_error(errno, ft_strdup("fd calloc"), p, 1);
 	}
 	p->pid = ft_calloc(p->cmd_ct, sizeof(int));
 	if (!p->pid)
-		ft_error(errno, "pid calloc", p, 1);
+		ft_error(errno, ft_strdup("pid calloc"), p, 1);
 }
 
 void	close_pipes(t_var *p)
@@ -64,9 +69,10 @@ void	close_pipes(t_var *p)
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch)
 {
-	// ft_printf("%s: %s\n", strerror(error), str);
-	(void)error;
-	ft_printf("zsh: %s\n", str);
+	if (!error)
+		ft_printf("No such file or directory: %s\n", str);
+	else
+		ft_printf("%s: %s\n", strerror(error), str);
 	free(str);
 	if (exit_switch)
 	{

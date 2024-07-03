@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:34 by chon              #+#    #+#             */
-/*   Updated: 2024/07/02 16:57:11 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/03 16:40:28 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 typedef struct s_var
 {
 	char	*filepaths;
+	char	*filepath_0;
 	char	**cmd_filepaths;
 	char	***cmd_args;
 	char	**exec_cmd_path;
@@ -31,6 +32,7 @@ typedef struct s_var
 	int		i;
 	int		j;
 	int		k;
+	int		empty_fd;
 }	t_var;
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch);
