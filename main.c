@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/03 18:46:03 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/04 11:46:28 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	find_paths(t_var *p, char **av)
 
 void	execute(t_var *p, char *infile, int fd_in, int fd_out)
 {
-	if ((access(infile, R_OK) < 0 && !p->i)
+	if ((access(infile, X_OK) < 0 && !p->i)
 		|| (p->i > 0 && !p->cmd_args[p->i - 1][0]))
 	{
 		if (dup2(p->empty_fd, STDIN_FILENO) < 0)

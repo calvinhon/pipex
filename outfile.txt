@@ -12,4 +12,3 @@ pipex.h
 pipex_tester_42
 utils_1.c
 utils_1.o
-dfdsa

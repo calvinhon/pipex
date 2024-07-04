@@ -6,11 +6,30 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/03 18:17:38 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/04 11:42:23 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+
+int	is_empty(t_var p, char **av)
+{
+	size_t	sp_ct;
+
+	if (!ft_strlen(av[p.i + 1]))
+		return (0);
+	sp_ct = 0;
+	p.j = -1;
+	while (av[p.i + 1][++p.j])
+	{
+		if (av[p.i + 1][p.j] == ' ')
+			sp_ct++;
+	}
+	if (sp_ct == ft_strlen(av[p.i + 1]))
+		return (0);
+	else
+		return (1);
+}
 
 void	check_filepath(t_var *p, char **av)
 {
@@ -20,11 +39,11 @@ void	check_filepath(t_var *p, char **av)
 	exit_switch = 0;
 	if (++p->i == p->cmd_ct)
 		exit_switch = 1;
-	if (p->i > 1 && (!ft_strlen(p->cmd_args[p->i - 1][0])
-		|| !ft_strncmp("invalid", p->exec_cmd_path[p->i - 1], 7)))
+	if ((p->i == 1 && !access(av[1], X_OK)
+			&& (!ft_strncmp("invalid", p->exec_cmd_path[p->i - 1], 7)
+			|| !is_empty(*p, av)))
+		|| (p->i > 1 && !ft_strncmp("invalid", p->exec_cmd_path[p->i - 1], 7)))
 	{
-		free(p->exec_cmd_path[p->i - 1]);
-		p->exec_cmd_path[p->i - 1] = ft_strdup("invalid");
 		if (ft_strlen(av[p->i + 1]))
 		{
 			err_msg = ft_strjoin("command not found: ",
