@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:34 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 10:38:31 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 13:07:39 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,13 @@ typedef struct s_var
 	int		**fd;
 	int		*pid;
 	int		cmd_ct;
-	int		in_fd;
-	int		out_fd;
+	int		infile;
+	int		outfile;
 	int		i;
 	int		j;
 	int		k;
 	int		empty_fd;
+	int		hd_shift;
 }	t_var;
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch);
@@ -43,5 +44,6 @@ void	free_all(t_var *p);
 void	setup(t_var *p);
 void	close_pipes(t_var *p);
 void	check_filepaths(t_var *p, char **av);
+void	pipex(t_var *p, char *infile);
 
 #endif

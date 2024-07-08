@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 10:42:56 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 14:16:58 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,26 +35,30 @@ void	check_filepaths(t_var *p, char **av)
 	char	*err_msg;
 
 	p->i = 0;
+	exit_switch = 0;
 	while (p->exec_cmd_path[++p->i - 1])
 	{
-		if (p->i == 1 && access(av[1], R_OK) < 0)
+		// printf("%s\n", p->exec_cmd_path[p->i - 1]);
+		// printf("%s\n", av[p->i + 1 + p->hd_shift]);
+		// printf("%d\n", p->cmd_ct);
+		if (p->i == 1 && !p->hd_shift && access(av[1], R_OK) < 0)
 			p->i++;
-		exit_switch = 0;
 		if (p->i == p->cmd_ct)
 			exit_switch = 1;
-		if ((ft_strlen(av[p->i + 1]) && !is_empty(av[p->i + 1]))
+		if ((ft_strlen(av[p->i + 1 + p->hd_shift])
+			&& !is_empty(av[p->i + 1 + p->hd_shift]))
 			|| access(p->exec_cmd_path[p->i - 1], X_OK) < 0)
 		{
 			err_msg = ft_strjoin("Command not found: ",
 					p->cmd_args[p->i - 1][0]);
 			ft_error(errno, err_msg, p, exit_switch);
 		}
-		else if (!ft_strlen(av[p->i + 1]))
+		else if (!ft_strlen(av[p->i + 1 + p->hd_shift]))
 			ft_error(errno, ft_strdup("Permission denied:"), p, exit_switch);
 	}
 }
 
-void	setup(t_var *p)
+void	setup_p_cp_arr(t_var *p)
 {
 	int	i;
 
@@ -73,7 +77,7 @@ void	setup(t_var *p)
 		ft_error(errno, ft_strdup("pid calloc"), p, 1);
 }
 
-void	close_pipes(t_var *p)
+void	close_fds(t_var *p)
 {
 	p->j = -1;
 	p->k = -1;
@@ -83,6 +87,9 @@ void	close_pipes(t_var *p)
 			close(p->fd[p->j][p->k]);
 		p->k = -1;
 	}
+	close(p->empty_fd);
+	close(p->infile);
+	close(p->outfile);
 }
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch)

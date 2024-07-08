@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 10:42:54 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 13:07:17 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,11 @@ void	check_filepaths(t_var *p, char **av)
 	char	*err_msg;
 
 	p->i = 0;
+	exit_switch = 0;
 	while (p->exec_cmd_path[++p->i - 1])
 	{
 		if (p->i == 1 && access(av[1], R_OK) < 0)
 			p->i++;
-		exit_switch = 0;
 		if (p->i == p->cmd_ct)
 			exit_switch = 1;
 		if ((ft_strlen(av[p->i + 1]) && !is_empty(av[p->i + 1]))

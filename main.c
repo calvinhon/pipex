@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 10:51:14 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 13:12:20 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,65 +39,18 @@ void	find_paths(t_var *p, char **av)
 	check_filepaths(p, av);
 }
 
-void	execute(t_var *p, char *infile, int fd_in, int fd_out)
+void	init2(char **av, t_var *p, int ac)
 {
-	if ((access(infile, X_OK) < 0 && !p->i)
-		|| (p->i > 0 && !p->cmd_args[p->i - 1][0]))
-	{
-		if (dup2(p->empty_fd, STDIN_FILENO) < 0)
-			ft_error(errno, ft_strdup("dup"), p, 1);
-		close(p->empty_fd);
-	}
-	else
-		if (dup2(fd_in, STDIN_FILENO) < 0)
-			ft_error(errno, ft_strdup("dup"), p, 1);
-	if (!(p->i == p->cmd_ct - 1 && !p->cmd_args[p->i][0]))
-		if (dup2(fd_out, STDOUT_FILENO) < 0)
-			ft_error(errno, ft_strdup("dup"), p, 1);
-	close_pipes(p);
-	if (!access(infile, X_OK) || p->i)
-		if (execve(p->exec_cmd_path[p->i], p->cmd_args[p->i], NULL) < 0)
-			ft_error(errno, ft_strdup("execve"), p, 1);
-}
-
-void	pipex(t_var *p, char *infile)
-{
-	p->i = -1;
-	while (++p->i < p->cmd_ct - 1)
-		if (pipe(p->fd[p->i]) < 0)
-			ft_error(errno, ft_strdup("pipe"), p, 1);
-	p->i = -1;
-	while (++p->i < p->cmd_ct)
-	{
-		p->pid[p->i] = fork();
-		if (p->pid[p->i] < 0)
-			ft_error(errno, ft_strdup("fork"), p, 1);
-		if (!p->pid[p->i] && p->exec_cmd_path[p->i])
-		{
-			if (!p->i)
-				execute(p, infile, p->in_fd, p->fd[p->i][1]);
-			else if (p->i < p->cmd_ct - 1)
-				execute(p, infile, p->fd[p->i - 1][0], p->fd[p->i][1]);
-			else
-				execute(p, infile, p->fd[p->i - 1][0], p->out_fd);
-		}
-		waitpid(p->pid[p->i], NULL, WNOHANG);
-	}
-	close_pipes(p);
-}
-
-void	init(char **av, t_var *p, int ac)
-{
-	p->cmd_args = NULL;
-	p->cmd_filepaths = NULL;
-	p->exec_cmd_path = NULL;
-	p->cmd_ct = ac - 3;
+	p->cmd_ct = ac - 3 - p->hd_shift;
 	setup(p);
-	p->in_fd = open(av[1], O_RDONLY);
-	if (p->in_fd < 0)
-		ft_error(errno, ft_strdup(av[1]), p, 0);
-	p->out_fd = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
-	if (p->out_fd < 0)
+	if (!p->hd_shift)
+	{
+		p->infile = open(av[1], O_RDONLY);
+		if (p->infile < 0)
+			ft_error(errno, ft_strdup(av[1]), p, 0);
+	}
+	p->outfile = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	if (p->outfile < 0)
 		ft_error(errno, ft_strdup(av[ac - 1]), p, 1);
 	p->cmd_filepaths = ft_split(p->filepaths, ':');
 	if (!p->cmd_filepaths)
@@ -107,7 +60,7 @@ void	init(char **av, t_var *p, int ac)
 		ft_error(errno, ft_strdup("malloc cmd_args"), p, 1);
 	p->i = -1;
 	while (++p->i < p->cmd_ct)
-		p->cmd_args[p->i] = ft_split(av[p->i + 2], ' ');
+		p->cmd_args[p->i] = ft_split(av[p->i + 2 + p->hd_shift], ' ');
 	p->cmd_args[p->i] = NULL;
 	p->exec_cmd_path = calloc(p->cmd_ct + 1, sizeof(char *));
 	if (!p->exec_cmd_path)
@@ -115,21 +68,31 @@ void	init(char **av, t_var *p, int ac)
 	find_paths(p, av);
 }
 
+void	init1(t_var *p, char **env)
+{
+	p->cmd_args = NULL;
+	p->cmd_filepaths = NULL;
+	p->exec_cmd_path = NULL;
+	p->i = 0;
+	while (!ft_strnstr(env[p->i], "PATH", 4))
+		p->i++;
+	if (env[p->i])
+		p->filepaths = ft_substr(env[p->i], 5, ft_strlen(env[p->i]) - 5);
+}
+
 int	main(int ac, char **av, char **env)
 {
 	t_var	p;
-	int		i;
 
-	i = 0;
 	p.filepaths = NULL;
-	while (!ft_strnstr(env[i], "PATH", 4))
-		i++;
-	if (env[i])
-		p.filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
+	p.hd_shift = 0;
+	init1(&p, env);
 	if (ac == 5 && p.filepaths)
 	{
-		init(av, &p, ac);
+		init2(av, &p, ac);
 		p.empty_fd = open("empty.txt", O_TRUNC | O_CREAT, 0777);
+		if (p.empty_fd < 0)
+			ft_error(errno, ft_strdup("empty.txt"), &p, 1);
 		pipex(&p, av[1]);
 		free_all(&p);
 	}
@@ -138,7 +101,7 @@ int	main(int ac, char **av, char **env)
 		if (p.filepaths)
 			free(p.filepaths);
 		ft_printf("Ensure ENV exists and ");
-		ft_printf("input an infile, only two cmd args, and an outfile\n");
+		ft_printf("input an infile, two cmd args, and an outfile\n");
 	}
 	return (0);
 }

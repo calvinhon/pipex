@@ -1,0 +1,23 @@
+hello
+world
+good bye
+a1
+hello
+hello I am
+hello thereMakefile
+bonus
+free.c
+free.o
+infile.txt
+libft
+main.c
+main.o
+outfile.txt
+pipex
+pipex.c
+pipex.h
+pipex.o
+utils_1.c
+utils_1.o
+why
+fdieiwhy

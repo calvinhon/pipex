@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/01 14:18:37 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 11:03:17 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 13:07:30 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ void	free_char_arr(char **twoD, char ***threeD)
 void	free_all(t_var *p)
 {
 	unlink("empty.txt");
+	unlink("here_doc.txt");
 	free(p->filepaths);
 	free(p->pid);
 	free_int_array(p->fd, p->cmd_ct);

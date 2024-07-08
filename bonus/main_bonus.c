@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 10:30:03 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 14:24:23 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,20 +38,26 @@ void	find_paths(t_var *p, char **av)
 	p->exec_cmd_path[p->i] = NULL;
 	check_filepaths(p, av);
 }
+void	setup_in_out_files(char	**av, t_var *p, int ac)
+{
+	if (!p->hd_shift)
+	{
+		p->infile = open(av[1], O_RDONLY);
+		if (p->infile < 0)
+			ft_error(errno, ft_strdup(av[1]), p, 0);
+		p->outfile = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	}
+	else
+		p->outfile = open(av[ac - 1], O_WRONLY | O_APPEND | O_CREAT, 0777);
+	if (p->outfile < 0)
+		ft_error(errno, ft_strdup(av[ac - 1]), p, 1);
+}
 
 void	init2(char **av, t_var *p, int ac)
 {
 	p->cmd_ct = ac - 3 - p->hd_shift;
-	setup(p);
-	if (!p->hd_shift)
-	{
-		p->in_fd = open(av[1], O_RDONLY);
-		if (p->in_fd < 0)
-			ft_error(errno, ft_strdup(av[1]), p, 0);
-	}
-	p->out_fd = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
-	if (p->out_fd < 0)
-		ft_error(errno, ft_strdup(av[ac - 1]), p, 1);
+	setup_p_cp_arr(p);
+	setup_in_out_files(av, p, ac);
 	p->cmd_filepaths = ft_split(p->filepaths, ':');
 	if (!p->cmd_filepaths)
 		ft_error(errno, ft_strdup("cmd_filepaths"), p, 1);
@@ -83,13 +89,13 @@ void	init1(char **av, t_var *p, char **env)
 	if (!ft_strncmp(av[1], "here_doc", 8))
 	{
 		p->hd_shift = 1;
-		p->in_fd = open("here_doc.txt", O_TRUNC | O_CREAT, 0777);
-		if (p->in_fd < 0)
+		p->infile = open("here_doc.txt", O_RDWR | O_TRUNC | O_CREAT, 0777);
+		if (p->infile < 0)
 			ft_error(errno, ft_strdup("here_doc.txt"), p, 1);
 		line = get_next_line(0);
 		while (ft_strncmp(av[2], line, ft_strlen(line) - 1))
 		{
-			write(p->in_fd, line, ft_strlen(line));
+			write(p->infile, line, ft_strlen(line));
 			free(line);
 			line = get_next_line(0);
 		}

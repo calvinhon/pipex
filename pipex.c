@@ -10,24 +10,23 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex_bonus.h"
+#include "pipex.h"
 
 void	execute(t_var *p, char *infile, int fd_in, int fd_out)
 {
-	// printf("%s\n", p->exec_cmd_path[p->i]);
-	// printf("in:%d out:%d\n", fd_in, fd_out);
-	if ((!p->i && !p->hd_shift && access(infile, R_OK) < 0)
+	if ((!p->i && access(infile, R_OK) < 0)
 		|| (p->i > 0 && !p->cmd_args[p->i - 1][0]))
 	{
 		if (dup2(p->empty_fd, STDIN_FILENO) < 0)
 			ft_error(errno, ft_strdup("dup"), p, 1);
+		close(p->empty_fd);
 	}
 	else
 		if (dup2(fd_in, STDIN_FILENO) < 0)
 			ft_error(errno, ft_strdup("dup"), p, 1);
 	if (dup2(fd_out, STDOUT_FILENO) < 0)
 		ft_error(errno, ft_strdup("dup"), p, 1);
-	close_fds(p);
+	close_pipes(p);
 	if (execve(p->exec_cmd_path[p->i], p->cmd_args[p->i], NULL) < 0)
 		ft_error(errno, ft_strdup("execve"), p, 1);
 }
@@ -55,5 +54,5 @@ void	pipex(t_var *p, char *infile)
 		}
 		waitpid(p->pid[p->i], NULL, WNOHANG);
 	}
-	close_fds(p);
+	close_pipes(p);
 }
