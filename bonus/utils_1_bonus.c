@@ -6,52 +6,51 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/04 11:44:35 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 10:42:56 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
 
-int	is_empty(t_var p, char **av)
+int	is_empty(char *av)
 {
+	int		i;
 	size_t	sp_ct;
 
-	if (!ft_strlen(av[p.i + 1]))
-		return (0);
+	i = -1;
 	sp_ct = 0;
-	p.j = -1;
-	while (av[p.i + 1][++p.j])
+	while (av[++i])
 	{
-		if (av[p.i + 1][p.j] == ' ')
+		if (av[i] == ' ')
 			sp_ct++;
 	}
-	if (sp_ct == ft_strlen(av[p.i + 1]))
+	if (sp_ct == ft_strlen(av))
 		return (0);
-	else
-		return (1);
+	return (1);
 }
 
-void	check_filepath(t_var *p, char **av)
+void	check_filepaths(t_var *p, char **av)
 {
 	int		exit_switch;
 	char	*err_msg;
 
-	exit_switch = 0;
-	if (++p->i == p->cmd_ct)
-		exit_switch = 1;
-	if ((p->i == 1 && !access(av[1], X_OK)
-			&& (!ft_strncmp("invalid", p->exec_cmd_path[p->i - 1], 7)
-			|| !is_empty(*p, av)))
-		|| (p->i > 1 && !ft_strncmp("invalid", p->exec_cmd_path[p->i - 1], 7)))
+	p->i = 0;
+	while (p->exec_cmd_path[++p->i - 1])
 	{
-		if (ft_strlen(av[p->i + 1]))
+		if (p->i == 1 && access(av[1], R_OK) < 0)
+			p->i++;
+		exit_switch = 0;
+		if (p->i == p->cmd_ct)
+			exit_switch = 1;
+		if ((ft_strlen(av[p->i + 1]) && !is_empty(av[p->i + 1]))
+			|| access(p->exec_cmd_path[p->i - 1], X_OK) < 0)
 		{
-			err_msg = ft_strjoin("command not found: ",
+			err_msg = ft_strjoin("Command not found: ",
 					p->cmd_args[p->i - 1][0]);
 			ft_error(errno, err_msg, p, exit_switch);
 		}
-		else
-			ft_error(errno, ft_strdup("permission denied:"), p, exit_switch);
+		else if (!ft_strlen(av[p->i + 1]))
+			ft_error(errno, ft_strdup("Permission denied:"), p, exit_switch);
 	}
 }
 
@@ -89,7 +88,7 @@ void	close_pipes(t_var *p)
 void	ft_error(int error, char *str, t_var *p, int exit_switch)
 {
 	if (!error)
-		ft_printf("No such file or directory: %s\n", str);
+		ft_printf("%s\n", str);
 	else
 		ft_printf("%s: %s\n", strerror(error), str);
 	free(str);

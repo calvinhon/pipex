@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/04 11:46:28 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 10:51:14 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,31 +14,29 @@
 
 void	find_paths(t_var *p, char **av)
 {
-	char	*filepath;
-
-	p->i = 0;
+	p->i = -1;
 	p->j = -1;
-	while (p->i < p->cmd_ct)
+	while (++p->i < p->cmd_ct)
 	{
 		while (p->cmd_filepaths[++p->j])
 		{
 			p->filepath_0 = ft_strjoin(p->cmd_filepaths[p->j], "/");
-			filepath = ft_strjoin(p->filepath_0, p->cmd_args[p->i][0]);
+			p->filepath = ft_strjoin(p->filepath_0, p->cmd_args[p->i][0]);
 			free(p->filepath_0);
-			if (!access(filepath, X_OK))
+			if (access(p->filepath, X_OK) > -1)
 			{
-				p->exec_cmd_path[p->i] = ft_strdup(filepath);
-				free(filepath);
+				p->exec_cmd_path[p->i] = ft_strdup(p->filepath);
+				free(p->filepath);
 				break ;
 			}
-			free(filepath);
+			free(p->filepath);
 		}
 		if (!p->exec_cmd_path[p->i])
 			p->exec_cmd_path[p->i] = ft_strdup("invalid");
-		check_filepath(p, av);
 		p->j = -1;
 	}
 	p->exec_cmd_path[p->i] = NULL;
+	check_filepaths(p, av);
 }
 
 void	execute(t_var *p, char *infile, int fd_in, int fd_out)
@@ -139,7 +137,8 @@ int	main(int ac, char **av, char **env)
 	{
 		if (p.filepaths)
 			free(p.filepaths);
-		ft_printf("Input an infile, only two cmd args, and an outfile\n");
+		ft_printf("Ensure ENV exists and ");
+		ft_printf("input an infile, only two cmd args, and an outfile\n");
 	}
 	return (0);
 }

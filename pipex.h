@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:34 by chon              #+#    #+#             */
-/*   Updated: 2024/07/03 18:16:32 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 10:38:31 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ typedef struct s_var
 {
 	char	*filepaths;
 	char	*filepath_0;
+	char	*filepath;
 	char	**cmd_filepaths;
 	char	***cmd_args;
 	char	**exec_cmd_path;
@@ -41,6 +42,6 @@ void	free_int_array(int **twoD, int cmd_ct);
 void	free_all(t_var *p);
 void	setup(t_var *p);
 void	close_pipes(t_var *p);
-void	check_filepath(t_var *p, char **av);
+void	check_filepaths(t_var *p, char **av);
 
 #endif

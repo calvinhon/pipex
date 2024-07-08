@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/03 18:42:56 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/08 10:30:03 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,38 +14,36 @@
 
 void	find_paths(t_var *p, char **av)
 {
-	char	*filepath;
-
-	p->i = 0;
+	p->i = -1;
 	p->j = -1;
-	while (p->i < p->cmd_ct)
+	while (++p->i < p->cmd_ct)
 	{
 		while (p->cmd_filepaths[++p->j])
 		{
 			p->filepath_0 = ft_strjoin(p->cmd_filepaths[p->j], "/");
-			filepath = ft_strjoin(p->filepath_0, p->cmd_args[p->i][0]);
+			p->filepath = ft_strjoin(p->filepath_0, p->cmd_args[p->i][0]);
 			free(p->filepath_0);
-			if (access(filepath, X_OK) > -1)
+			if (access(p->filepath, X_OK) > -1)
 			{
-				p->exec_cmd_path[p->i] = ft_strdup(filepath);
-				free(filepath);
+				p->exec_cmd_path[p->i] = ft_strdup(p->filepath);
+				free(p->filepath);
 				break ;
 			}
-			free(filepath);
+			free(p->filepath);
 		}
 		if (!p->exec_cmd_path[p->i])
 			p->exec_cmd_path[p->i] = ft_strdup("invalid");
-		check_filepath(p, av);
 		p->j = -1;
 	}
 	p->exec_cmd_path[p->i] = NULL;
+	check_filepaths(p, av);
 }
 
 void	init2(char **av, t_var *p, int ac)
 {
 	p->cmd_ct = ac - 3 - p->hd_shift;
 	setup(p);
-	if (p->hd_shift)
+	if (!p->hd_shift)
 	{
 		p->in_fd = open(av[1], O_RDONLY);
 		if (p->in_fd < 0)
@@ -77,7 +75,6 @@ void	init1(char **av, t_var *p, char **env)
 	p->cmd_args = NULL;
 	p->cmd_filepaths = NULL;
 	p->exec_cmd_path = NULL;
-	p->filepaths = NULL;
 	p->i = 0;
 	while (!ft_strnstr(env[p->i], "PATH", 4))
 		p->i++;
@@ -104,10 +101,11 @@ int	main(int ac, char **av, char **env)
 {
 	t_var	p;
 
+	p.filepaths = NULL;
 	p.hd_shift = 0;
 	init1(av, &p, env);
 	if (((!ft_strncmp(av[1], "here_doc", 8) && ac > 5)
-		|| (ft_strncmp(av[1], "here_doc", 8) && ac > 4)) && p.filepaths)
+			|| (ft_strncmp(av[1], "here_doc", 8) && ac > 4)) && p.filepaths)
 	{
 		init2(av, &p, ac);
 		p.empty_fd = open("empty.txt", O_TRUNC | O_CREAT, 0777);
