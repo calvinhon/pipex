@@ -17,7 +17,8 @@ LIBFT = ./libft/libft.a
 OBJS = $(SRCS:.c=.o)
 SRCS = main.c utils_1.c free.c
 OBJS_B = $(SRCS_B:.c=.o)
-SRCS_B = ./bonus/main_bonus.c ./bonus/utils_1_bonus.c ./bonus/free_bonus.c
+SRCS_B = ./bonus/main_bonus.c ./bonus/pipex_bonus.c ./bonus/utils_1_bonus.c \
+./bonus/free_bonus.c
 
 $(NAME): $(OBJS)
 	make -C $(LIBFT_DIR)

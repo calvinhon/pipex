@@ -25,7 +25,7 @@ void	find_paths(t_var *p, char **av)
 			p->filepath_0 = ft_strjoin(p->cmd_filepaths[p->j], "/");
 			filepath = ft_strjoin(p->filepath_0, p->cmd_args[p->i][0]);
 			free(p->filepath_0);
-			if (access(filepath, X_OK) > -1)
+			if (!access(filepath, X_OK))
 			{
 				p->exec_cmd_path[p->i] = ft_strdup(filepath);
 				free(filepath);
@@ -53,10 +53,11 @@ void	execute(t_var *p, char *infile, int fd_in, int fd_out)
 	else
 		if (dup2(fd_in, STDIN_FILENO) < 0)
 			ft_error(errno, ft_strdup("dup"), p, 1);
-	if (dup2(fd_out, STDOUT_FILENO) < 0)
-		ft_error(errno, ft_strdup("dup"), p, 1);
+	if (!(p->i == p->cmd_ct - 1 && !p->cmd_args[p->i][0]))
+		if (dup2(fd_out, STDOUT_FILENO) < 0)
+			ft_error(errno, ft_strdup("dup"), p, 1);
 	close_pipes(p);
-	if (access(infile, R_OK) > 0 || p->i)
+	if (!access(infile, X_OK) || p->i)
 		if (execve(p->exec_cmd_path[p->i], p->cmd_args[p->i], NULL) < 0)
 			ft_error(errno, ft_strdup("execve"), p, 1);
 }

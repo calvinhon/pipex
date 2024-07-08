@@ -49,6 +49,7 @@ void	free_char_arr(char **twoD, char ***threeD)
 void	free_all(t_var *p)
 {
 	unlink("empty.txt");
+	unlink("here_doc.txt");
 	free(p->filepaths);
 	free(p->pid);
 	free_int_array(p->fd, p->cmd_ct);

@@ -41,62 +41,16 @@ void	find_paths(t_var *p, char **av)
 	p->exec_cmd_path[p->i] = NULL;
 }
 
-void	execute(t_var *p, char *infile, int fd_in, int fd_out)
+void	init2(char **av, t_var *p, int ac)
 {
-	if ((access(infile, R_OK) < 0 && !p->i)
-		|| (p->i > 0 && !p->cmd_args[p->i - 1][0]))
-	{
-		if (dup2(p->empty_fd, STDIN_FILENO) < 0)
-			ft_error(errno, ft_strdup("dup"), p, 1);
-		close(p->empty_fd);
-	}
-	else
-		if (dup2(fd_in, STDIN_FILENO) < 0)
-			ft_error(errno, ft_strdup("dup"), p, 1);
-	if (dup2(fd_out, STDOUT_FILENO) < 0)
-		ft_error(errno, ft_strdup("dup"), p, 1);
-	close_pipes(p);
-	if (access(infile, R_OK) > 0 || p->i)
-		if (execve(p->exec_cmd_path[p->i], p->cmd_args[p->i], NULL) < 0)
-			ft_error(errno, ft_strdup("execve"), p, 1);
-}
-
-void	pipex(t_var *p, char *infile)
-{
-	p->i = -1;
-	while (++p->i < p->cmd_ct - 1)
-		if (pipe(p->fd[p->i]) < 0)
-			ft_error(errno, ft_strdup("pipe"), p, 1);
-	p->i = -1;
-	while (++p->i < p->cmd_ct)
-	{
-		p->pid[p->i] = fork();
-		if (p->pid[p->i] < 0)
-			ft_error(errno, ft_strdup("fork"), p, 1);
-		if (!p->pid[p->i] && p->exec_cmd_path[p->i])
-		{
-			if (!p->i)
-				execute(p, infile, p->in_fd, p->fd[p->i][1]);
-			else if (p->i < p->cmd_ct - 1)
-				execute(p, infile, p->fd[p->i - 1][0], p->fd[p->i][1]);
-			else
-				execute(p, infile, p->fd[p->i - 1][0], p->out_fd);
-		}
-		waitpid(p->pid[p->i], NULL, WNOHANG);
-	}
-	close_pipes(p);
-}
-
-void	init(char **av, t_var *p, int ac)
-{
-	p->cmd_args = NULL;
-	p->cmd_filepaths = NULL;
-	p->exec_cmd_path = NULL;
-	p->cmd_ct = ac - 3;
+	p->cmd_ct = ac - 3 - p->hd_shift;
 	setup(p);
-	p->in_fd = open(av[1], O_RDONLY);
-	if (p->in_fd < 0)
-		ft_error(errno, ft_strdup(av[1]), p, 0);
+	if (p->hd_shift)
+	{
+		p->in_fd = open(av[1], O_RDONLY);
+		if (p->in_fd < 0)
+			ft_error(errno, ft_strdup(av[1]), p, 0);
+	}
 	p->out_fd = open(av[ac - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (p->out_fd < 0)
 		ft_error(errno, ft_strdup(av[ac - 1]), p, 1);
@@ -108,7 +62,7 @@ void	init(char **av, t_var *p, int ac)
 		ft_error(errno, ft_strdup("malloc cmd_args"), p, 1);
 	p->i = -1;
 	while (++p->i < p->cmd_ct)
-		p->cmd_args[p->i] = ft_split(av[p->i + 2], ' ');
+		p->cmd_args[p->i] = ft_split(av[p->i + 2 + p->hd_shift], ' ');
 	p->cmd_args[p->i] = NULL;
 	p->exec_cmd_path = calloc(p->cmd_ct + 1, sizeof(char *));
 	if (!p->exec_cmd_path)
@@ -116,21 +70,49 @@ void	init(char **av, t_var *p, int ac)
 	find_paths(p, av);
 }
 
+void	init1(char **av, t_var *p, char **env)
+{
+	char	*line;
+
+	p->cmd_args = NULL;
+	p->cmd_filepaths = NULL;
+	p->exec_cmd_path = NULL;
+	p->filepaths = NULL;
+	p->i = 0;
+	while (!ft_strnstr(env[p->i], "PATH", 4))
+		p->i++;
+	if (env[p->i])
+		p->filepaths = ft_substr(env[p->i], 5, ft_strlen(env[p->i]) - 5);
+	if (!ft_strncmp(av[1], "here_doc", 8))
+	{
+		p->hd_shift = 1;
+		p->in_fd = open("here_doc.txt", O_TRUNC | O_CREAT, 0777);
+		if (p->in_fd < 0)
+			ft_error(errno, ft_strdup("here_doc.txt"), p, 1);
+		line = get_next_line(0);
+		while (ft_strncmp(av[2], line, ft_strlen(line) - 1))
+		{
+			write(p->in_fd, line, ft_strlen(line));
+			free(line);
+			line = get_next_line(0);
+		}
+		free(line);
+	}
+}
+
 int	main(int ac, char **av, char **env)
 {
 	t_var	p;
-	int		i;
 
-	i = 0;
-	p.filepaths = NULL;
-	while (!ft_strnstr(env[i], "PATH", 4))
-		i++;
-	if (env[i])
-		p.filepaths = ft_substr(env[i], 5, ft_strlen(env[i]) - 5);
-	if (ac > 4 && p.filepaths)
+	p.hd_shift = 0;
+	init1(av, &p, env);
+	if (((!ft_strncmp(av[1], "here_doc", 8) && ac > 5)
+		|| (ft_strncmp(av[1], "here_doc", 8) && ac > 4)) && p.filepaths)
 	{
-		init(av, &p, ac);
+		init2(av, &p, ac);
 		p.empty_fd = open("empty.txt", O_TRUNC | O_CREAT, 0777);
+		if (p.empty_fd < 0)
+			ft_error(errno, ft_strdup("empty.txt"), &p, 1);
 		pipex(&p, av[1]);
 		free_all(&p);
 	}
@@ -138,7 +120,9 @@ int	main(int ac, char **av, char **env)
 	{
 		if (p.filepaths)
 			free(p.filepaths);
-		ft_printf("Input an infile, at least two cmd args, and an outfile\n");
+		ft_printf("Ensure ENV exists and ");
+		ft_printf("input either (i) an infile or (ii) here_doc and LIMITER, ");
+		ft_printf("at least two cmd args, and an outfile\n");
 	}
 	return (0);
 }

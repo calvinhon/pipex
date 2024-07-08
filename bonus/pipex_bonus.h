@@ -33,6 +33,7 @@ typedef struct s_var
 	int		j;
 	int		k;
 	int		empty_fd;
+	int		hd_shift;
 }	t_var;
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch);
@@ -42,5 +43,6 @@ void	free_all(t_var *p);
 void	setup(t_var *p);
 void	close_pipes(t_var *p);
 void	check_filepath(t_var *p, char **av);
+void	pipex(t_var *p, char *infile);
 
 #endif
