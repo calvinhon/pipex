@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 14:16:58 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/09 15:18:30 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,26 +34,25 @@ void	check_filepaths(t_var *p, char **av)
 	int		exit_switch;
 	char	*err_msg;
 
-	p->i = 0;
+	p->i = -1;
 	exit_switch = 0;
-	while (p->exec_cmd_path[++p->i - 1])
+	while (p->exec_cmd_path[++p->i])
 	{
 		// printf("%s\n", p->exec_cmd_path[p->i - 1]);
 		// printf("%s\n", av[p->i + 1 + p->hd_shift]);
 		// printf("%d\n", p->cmd_ct);
-		if (p->i == 1 && !p->hd_shift && access(av[1], R_OK) < 0)
+		if (!p->i && !p->hd_shift && access(av[1], R_OK) < 0)
 			p->i++;
-		if (p->i == p->cmd_ct)
+		if (p->i == p->cmd_ct - 1)
 			exit_switch = 1;
-		if ((ft_strlen(av[p->i + 1 + p->hd_shift])
-			&& !is_empty(av[p->i + 1 + p->hd_shift]))
-			|| access(p->exec_cmd_path[p->i - 1], X_OK) < 0)
+		if (!ft_strncmp(p->exec_cmd_path[p->i], "invalid", 7)
+			&& ft_strlen(av[p->i + 2 + p->hd_shift]))
 		{
 			err_msg = ft_strjoin("Command not found: ",
-					p->cmd_args[p->i - 1][0]);
+					p->cmd_args[p->i][0]);
 			ft_error(errno, err_msg, p, exit_switch);
 		}
-		else if (!ft_strlen(av[p->i + 1 + p->hd_shift]))
+		else if (!ft_strlen(av[p->i + 2 + p->hd_shift]))
 			ft_error(errno, ft_strdup("Permission denied:"), p, exit_switch);
 	}
 }
@@ -84,12 +83,16 @@ void	close_fds(t_var *p)
 	while (++p->j < p->cmd_ct - 1)
 	{
 		while (++p->k < 2)
-			close(p->fd[p->j][p->k]);
+			if (p->fd[p->j][p->k] > -1)
+				close(p->fd[p->j][p->k]);
 		p->k = -1;
 	}
-	close(p->empty_fd);
-	close(p->infile);
-	close(p->outfile);
+	if (p->empty_fd > -1)
+		close(p->empty_fd);
+	if (p->infile > -1)
+		close(p->infile);
+	if (p->outfile > -1)
+		close(p->outfile);
 }
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch)

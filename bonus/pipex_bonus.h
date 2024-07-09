@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:34 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 14:17:07 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/09 16:14:47 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void	free_all(t_var *p);
 void	setup_p_cp_arr(t_var *p);
 void	close_fds(t_var *p);
 void	check_filepaths(t_var *p, char **av);
-void	pipex(t_var *p, char *infile);
+void	pipex(t_var *p);
+int		is_empty(char *av);
 
 #endif

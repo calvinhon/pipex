@@ -24,11 +24,13 @@ void	execute(t_var *p, char *infile, int fd_in, int fd_out)
 	else
 		if (dup2(fd_in, STDIN_FILENO) < 0)
 			ft_error(errno, ft_strdup("dup"), p, 1);
-	if (dup2(fd_out, STDOUT_FILENO) < 0)
-		ft_error(errno, ft_strdup("dup"), p, 1);
-	close_pipes(p);
-	if (execve(p->exec_cmd_path[p->i], p->cmd_args[p->i], NULL) < 0)
-		ft_error(errno, ft_strdup("execve"), p, 1);
+	if (!(p->i == p->cmd_ct - 1 && !p->cmd_args[p->i][0]))
+		if (dup2(fd_out, STDOUT_FILENO) < 0)
+			ft_error(errno, ft_strdup("dup"), p, 1);
+	close_fds(p);
+	if (!access(infile, R_OK) || p->i)
+		if (execve(p->exec_cmd_path[p->i], p->cmd_args[p->i], NULL) < 0)
+			ft_error(errno, ft_strdup("execve"), p, 1);
 }
 
 void	pipex(t_var *p, char *infile)
@@ -54,5 +56,5 @@ void	pipex(t_var *p, char *infile)
 		}
 		waitpid(p->pid[p->i], NULL, WNOHANG);
 	}
-	close_pipes(p);
+	close_fds(p);
 }

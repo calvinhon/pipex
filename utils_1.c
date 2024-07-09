@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/08 13:07:17 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/09 14:05:01 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,16 +73,23 @@ void	setup(t_var *p)
 		ft_error(errno, ft_strdup("pid calloc"), p, 1);
 }
 
-void	close_pipes(t_var *p)
+void	close_fds(t_var *p)
 {
 	p->j = -1;
 	p->k = -1;
 	while (++p->j < p->cmd_ct - 1)
 	{
 		while (++p->k < 2)
-			close(p->fd[p->j][p->k]);
+			if (p->fd[p->j][p->k] > -1)
+				close(p->fd[p->j][p->k]);
 		p->k = -1;
 	}
+	if (p->empty_fd > -1)
+		close(p->empty_fd);
+	if (p->infile > -1)
+		close(p->infile);
+	if (p->outfile > -1)
+		close(p->outfile);
 }
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch)
