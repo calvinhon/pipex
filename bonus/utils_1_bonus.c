@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/09 15:18:30 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/09 18:33:52 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,8 @@ void	close_fds(t_var *p)
 		close(p->infile);
 	if (p->outfile > -1)
 		close(p->outfile);
+	unlink("here_doc.txt");
+	unlink("empty.txt");
 }
 
 void	ft_error(int error, char *str, t_var *p, int exit_switch)

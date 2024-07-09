@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/09 16:15:27 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/09 18:30:14 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ void	find_paths(t_var *p, char **av)
 		}
 	}
 }
-
 
 void	init_outfile_arrays(char **av, t_var *p, int ac)
 {
@@ -125,7 +124,9 @@ int	main(int ac, char **av, char **env)
 		p.empty_fd = open("empty.txt", O_TRUNC | O_CREAT, 0777);
 		if (p.empty_fd < 0)
 			ft_error(errno, ft_strdup("empty.txt"), &p, 1);
-		pipex(&p);
+		// if (p.infile < 0)
+		// 	p.infile = p.empty_fd;
+		pipex(&p, av[1]);
 		free_all(&p);
 	}
 	else
