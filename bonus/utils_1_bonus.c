@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/09 18:33:52 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/10 17:08:54 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,6 @@ void	check_filepaths(t_var *p, char **av)
 	exit_switch = 0;
 	while (p->exec_cmd_path[++p->i])
 	{
-		// printf("%s\n", p->exec_cmd_path[p->i - 1]);
-		// printf("%s\n", av[p->i + 1 + p->hd_shift]);
-		// printf("%d\n", p->cmd_ct);
 		if (!p->i && !p->hd_shift && access(av[1], R_OK) < 0)
 			p->i++;
 		if (p->i == p->cmd_ct - 1)
@@ -53,7 +50,10 @@ void	check_filepaths(t_var *p, char **av)
 			ft_error(errno, err_msg, p, exit_switch);
 		}
 		else if (!ft_strlen(av[p->i + 2 + p->hd_shift]))
+		{
+			close_fds(p);
 			ft_error(errno, ft_strdup("Permission denied:"), p, exit_switch);
+		}
 	}
 }
 
@@ -62,10 +62,10 @@ void	setup_p_cp_arr(t_var *p)
 	int	i;
 
 	i = -1;
-	p->fd = ft_calloc(p->cmd_ct - 1, sizeof(int *));
+	p->fd = ft_calloc(p->pipe_ct, sizeof(int *));
 	if (!p->fd)
 		ft_error(errno, ft_strdup("fd calloc"), p, 1);
-	while (++i < p->cmd_ct - 1)
+	while (++i < p->pipe_ct)
 	{
 		p->fd[i] = ft_calloc(2, sizeof(int));
 		if (!p->fd)
@@ -80,19 +80,26 @@ void	close_fds(t_var *p)
 {
 	p->j = -1;
 	p->k = -1;
-	while (++p->j < p->cmd_ct - 1)
+	if (p->pipe_ct)
 	{
-		while (++p->k < 2)
-			if (p->fd[p->j][p->k] > -1)
+		while (++p->j < p->pipe_ct)
+		{
+			while (++p->k < 2)
 				close(p->fd[p->j][p->k]);
-		p->k = -1;
+			p->k = -1;
+		}
 	}
-	if (p->empty_fd > -1)
-		close(p->empty_fd);
-	if (p->infile > -1)
-		close(p->infile);
 	if (p->outfile > -1)
 		close(p->outfile);
+	if (p->empty_fd == p->infile && p->empty_fd)
+		close(p->empty_fd);
+	else
+	{
+		if (p->empty_fd > -1)
+			close(p->empty_fd);
+		if (p->infile > -1)
+			close(p->infile);
+	}
 	unlink("here_doc.txt");
 	unlink("empty.txt");
 }

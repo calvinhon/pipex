@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/09 18:30:14 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/10 17:07:04 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ void	init_outfile_arrays(char **av, t_var *p, int ac)
 	if (p->outfile < 0)
 		ft_error(errno, ft_strdup(av[ac - 1]), p, 1);
 	p->cmd_ct = ac - 3 - p->hd_shift;
-	setup_p_cp_arr(p);
 	p->cmd_filepaths = ft_split(p->filepaths, ':');
 	if (!p->cmd_filepaths)
 		ft_error(errno, ft_strdup("cmd_filepaths"), p, 1);
@@ -88,6 +87,8 @@ void	init_infile(char **av, t_var *p)
 			line = get_next_line(0);
 		}
 		free(line);
+		close(p->infile);
+		p->infile = open("here_doc.txt", O_RDONLY);
 	}
 	else
 	{
@@ -103,12 +104,19 @@ void	init_filepaths(t_var *p, char **env)
 	p->cmd_args = NULL;
 	p->cmd_filepaths = NULL;
 	p->exec_cmd_path = NULL;
+	p->fd = NULL;
+	p->pid = NULL;
 	p->hd_shift = 0;
+	p->pipe_ct = 0;
+	p->empty_fd = 0;
 	p->i = 0;
-	while (!ft_strnstr(env[p->i], "PATH", 4))
-		p->i++;
 	if (env[p->i])
+	{
+		while (!ft_strnstr(env[p->i], "PATH", 4))
+			p->i++;
 		p->filepaths = ft_substr(env[p->i], 5, ft_strlen(env[p->i]) - 5);
+	}
+	p->env = env;
 }
 
 int	main(int ac, char **av, char **env)
@@ -124,8 +132,6 @@ int	main(int ac, char **av, char **env)
 		p.empty_fd = open("empty.txt", O_TRUNC | O_CREAT, 0777);
 		if (p.empty_fd < 0)
 			ft_error(errno, ft_strdup("empty.txt"), &p, 1);
-		// if (p.infile < 0)
-		// 	p.infile = p.empty_fd;
 		pipex(&p, av[1]);
 		free_all(&p);
 	}
