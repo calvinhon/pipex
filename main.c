@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 11:26:17 by chon              #+#    #+#             */
-/*   Updated: 2024/07/10 17:09:33 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/10 17:11:28 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,8 +124,7 @@ int	main(int ac, char **av, char **env)
 	t_var	p;
 
 	init_filepaths(&p, env);
-	if (ac > 4 && ((!ft_strncmp(av[1], "here_doc", 8) && ac > 5)
-			|| ft_strncmp(av[1], "here_doc", 8)) && p.filepaths)
+	if (ac == 5 && p.filepaths)
 	{
 		init_infile(av, &p);
 		init_outfile_arrays(av, &p, ac);
@@ -140,8 +139,8 @@ int	main(int ac, char **av, char **env)
 		if (p.filepaths)
 			free(p.filepaths);
 		ft_printf("Ensure ENV exists and ");
-		ft_printf("input either (i) an infile or (ii) here_doc and LIMITER, ");
-		ft_printf("at least two cmd args, and an outfile\n");
+		ft_printf("input an infile, ");
+		ft_printf("only two cmd args, and an outfile\n");
 	}
 	return (0);
 }
