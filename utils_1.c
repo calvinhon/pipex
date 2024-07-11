@@ -6,7 +6,7 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 16:09:22 by chon              #+#    #+#             */
-/*   Updated: 2024/07/10 16:54:42 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/11 13:29:44 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,7 @@ void	check_filepaths(t_var *p, char **av)
 		}
 		else if (!ft_strlen(av[p->i + 2 + p->hd_shift]))
 		{
-			close(p->infile);
-			close(p->outfile);
+			close_fds(p);
 			ft_error(errno, ft_strdup("Permission denied:"), p, exit_switch);
 		}
 	}

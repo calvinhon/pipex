@@ -6,11 +6,11 @@
 /*   By: chon <chon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/08 09:17:25 by chon              #+#    #+#             */
-/*   Updated: 2024/07/10 16:30:20 by chon             ###   ########.fr       */
+/*   Updated: 2024/07/10 17:12:16 by chon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex_bonus.h"
+#include "pipex.h"
 
 void	execute(t_var *p, int cmd_idx, int fd_in, int fd_out)
 {

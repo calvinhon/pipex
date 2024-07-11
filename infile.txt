@@ -1,7 +1,0 @@
-hello
-world
-good bye
-a1
-hello
-hello I am
-hello there
